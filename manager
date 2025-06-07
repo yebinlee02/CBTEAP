@@ -1,0 +1,4223 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>나만의 직장선배 - 팀 중심 관리자 대시보드</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Arial", sans-serif;
+        background-color: #f5f7fa;
+        color: #333;
+        line-height: 1.6;
+      }
+
+      .container {
+        width: 1200px;
+        margin: 0 auto;
+        background-color: white;
+        min-height: 100vh;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Header */
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .header h1 {
+        font-size: 24px;
+        font-weight: bold;
+      }
+
+      .header-info {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+
+      .admin-badge {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+      }
+
+      .last-update {
+        font-size: 13px;
+        opacity: 0.9;
+      }
+
+      /* Navigation */
+      .nav {
+        background-color: #2c3e50;
+        padding: 0;
+      }
+
+      .nav-list {
+        display: flex;
+        list-style: none;
+      }
+
+      .nav-item {
+        flex: 1;
+      }
+
+      .nav-link {
+        display: block;
+        padding: 18px 20px;
+        color: white;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.3s ease;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+      }
+
+      .nav-link:hover,
+      .nav-link.active {
+        background-color: #34495e;
+        color: #3498db;
+      }
+
+      /* Main Layout */
+      .main-layout {
+        display: flex;
+        min-height: 800px;
+      }
+
+      .content {
+        flex: 1;
+        padding: 30px;
+      }
+
+      .sidebar {
+        width: 300px;
+        background-color: #ecf0f1;
+        padding: 30px 20px;
+        border-left: 1px solid #ddd;
+      }
+
+      /* Tab Content */
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      /* Dashboard Specific Styles */
+      .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        margin-bottom: 30px;
+      }
+
+      .kpi-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e0e6ed;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .kpi-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+      }
+
+      .kpi-card.teams::before {
+        background: linear-gradient(90deg, #3498db, #2980b9);
+      }
+      .kpi-card.engagement::before {
+        background: linear-gradient(90deg, #27ae60, #229954);
+      }
+      .kpi-card.risk::before {
+        background: linear-gradient(90deg, #e74c3c, #c0392b);
+      }
+      .kpi-card.wellness::before {
+        background: linear-gradient(90deg, #f39c12, #e67e22);
+      }
+
+      .kpi-icon {
+        font-size: 32px;
+        margin-bottom: 15px;
+      }
+
+      .kpi-value {
+        font-size: 36px;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-bottom: 8px;
+      }
+
+      .kpi-label {
+        font-size: 14px;
+        color: #7f8c8d;
+        margin-bottom: 10px;
+      }
+
+      .kpi-change {
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-weight: 500;
+      }
+
+      .change-positive {
+        background-color: #d4edda;
+        color: #155724;
+      }
+
+      .change-negative {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+
+      .change-neutral {
+        background-color: #e2e3e5;
+        color: #383d41;
+      }
+
+      /* Chart Containers */
+      .chart-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 25px;
+        margin-bottom: 30px;
+      }
+
+      .chart-card {
+        background: white;
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        border: 1px solid #e0e6ed;
+      }
+
+      .chart-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .chart-container {
+        height: 250px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        border-radius: 8px;
+        position: relative;
+      }
+
+      /* Progress Charts */
+      .progress-chart {
+        margin-bottom: 20px;
+      }
+
+      .progress-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 12px;
+        background-color: #ecf0f1;
+        border-radius: 6px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        border-radius: 6px;
+        transition: width 0.8s ease;
+      }
+
+      .progress-blue {
+        background: linear-gradient(90deg, #3498db, #2980b9);
+      }
+      .progress-green {
+        background: linear-gradient(90deg, #27ae60, #229954);
+      }
+      .progress-orange {
+        background: linear-gradient(90deg, #f39c12, #e67e22);
+      }
+      .progress-red {
+        background: linear-gradient(90deg, #e74c3c, #c0392b);
+      }
+      .progress-purple {
+        background: linear-gradient(90deg, #9b59b6, #8e44ad);
+      }
+
+      /* Mini Stats */
+      .mini-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+      }
+
+      .mini-stat {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+      }
+
+      .mini-stat-value {
+        font-size: 20px;
+        font-weight: bold;
+        color: #2c3e50;
+      }
+
+      .mini-stat-label {
+        font-size: 12px;
+        color: #7f8c8d;
+        margin-top: 5px;
+      }
+
+      /* Trend Indicators */
+      .trend-up::after {
+        content: " ↗";
+        color: #27ae60;
+        font-weight: bold;
+      }
+
+      .trend-down::after {
+        content: " ↘";
+        color: #e74c3c;
+        font-weight: bold;
+      }
+
+      .trend-stable::after {
+        content: " →";
+        color: #f39c12;
+        font-weight: bold;
+      }
+
+      /* Sidebar */
+      .sidebar h3 {
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-size: 18px;
+      }
+
+      .sidebar-section {
+        margin-bottom: 30px;
+      }
+
+      .quick-stat {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #ddd;
+        font-size: 14px;
+      }
+
+      .quick-stat:last-child {
+        border-bottom: none;
+      }
+
+      .stat-label {
+        color: #666;
+      }
+
+      .stat-value {
+        font-weight: bold;
+        color: #2c3e50;
+      }
+
+      .status-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+
+      .status-good {
+        background-color: #27ae60;
+      }
+      .status-warning {
+        background-color: #f39c12;
+      }
+      .status-danger {
+        background-color: #e74c3c;
+      }
+
+      /* Footer */
+      .footer {
+        background-color: #2c3e50;
+        color: white;
+        padding: 25px 30px;
+        text-align: center;
+      }
+
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 20px;
+      }
+
+      .footer-links a {
+        color: #bdc3c7;
+        text-decoration: none;
+        font-size: 14px;
+      }
+
+      .footer-links a:hover {
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <header class="header">
+        <h1>🧠 나만의 직장선배 - 팀 중심 관리자 대시보드</h1>
+        <div class="header-info">
+          <div class="admin-badge">👨‍💼 HR 관리자</div>
+          <div class="last-update">마지막 업데이트: 2025.06.06 09:30</div>
+        </div>
+      </header>
+
+      <!-- Navigation -->
+      <nav class="nav">
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a class="nav-link active" onclick="showTab('dashboard')"
+              >📊 대시보드</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="showTab('risk')">⚠️ 위험 관리</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="showTab('teams')">🏢 팀 관리</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="showTab('tokens')">🏆 토큰 관리</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="showTab('analytics')">📈 분석</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" onclick="showTab('compliance')"
+              >⚖️ 컴플라이언스</a
+            >
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Main Layout -->
+      <div class="main-layout">
+        <!-- Content -->
+        <main class="content">
+          <!-- Dashboard Tab -->
+          <div id="dashboard" class="tab-content active">
+            <!-- KPI Cards -->
+            <div class="kpi-grid">
+              <div class="kpi-card teams">
+                <div class="kpi-icon">🏢</div>
+                <div class="kpi-value">5개</div>
+                <div class="kpi-label">총 팀 수 (135명)</div>
+                <span class="kpi-change change-neutral">안정적 운영</span>
+              </div>
+              <div class="kpi-card engagement">
+                <div class="kpi-icon">📱</div>
+                <div class="kpi-value">67%</div>
+                <div class="kpi-label">평균 팀 참여율</div>
+                <span class="kpi-change change-positive">+5.2%</span>
+              </div>
+              <div class="kpi-card risk">
+                <div class="kpi-icon">⚠️</div>
+                <div class="kpi-value">2개팀</div>
+                <div class="kpi-label">위험/주의 팀</div>
+                <span class="kpi-change change-negative">개발팀, 마케팅팀</span>
+              </div>
+              <div class="kpi-card wellness">
+                <div class="kpi-icon">💚</div>
+                <div class="kpi-value">6.1</div>
+                <div class="kpi-label">평균 팀 웰빙지수</div>
+                <span class="kpi-change change-positive">+0.3</span>
+              </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="chart-grid">
+              <!-- Main Trend Chart -->
+              <div class="chart-card">
+                <div class="chart-title">📈 팀별 주간 웰빙지수 추이</div>
+                <div class="chart-container">
+                  <div
+                    style="
+                      width: 100%;
+                      height: 100%;
+                      position: relative;
+                      padding: 20px;
+                    "
+                  >
+                    <div
+                      style="
+                        width: 100%;
+                        height: 220px;
+                        position: relative;
+                        background: linear-gradient(
+                          to bottom,
+                          #f8fafc 0%,
+                          #f1f5f9 100%
+                        );
+                        border-radius: 8px;
+                        padding: 15px;
+                      "
+                    >
+                      <svg
+                        style="
+                          position: absolute;
+                          left: 25px;
+                          right: 15px;
+                          top: 15px;
+                          width: calc(100% - 40px);
+                          height: 150px;
+                        "
+                      >
+                        <!-- 인사팀 (우수) -->
+                        <path
+                          d="M 0,40 L 80,35 L 160,30 L 240,25 L 320,20"
+                          stroke="#16a34a"
+                          stroke-width="3"
+                          fill="none"
+                          stroke-linecap="round"
+                        />
+
+                        <!-- 디자인팀 (양호) -->
+                        <path
+                          d="M 0,80 L 80,75 L 160,70 L 240,65 L 320,60"
+                          stroke="#3b82f6"
+                          stroke-width="3"
+                          fill="none"
+                          stroke-linecap="round"
+                        />
+
+                        <!-- 마케팅팀 (주의) -->
+                        <path
+                          d="M 0,100 L 80,105 L 160,110 L 240,115 L 320,120"
+                          stroke="#f59e0b"
+                          stroke-width="3"
+                          fill="none"
+                          stroke-linecap="round"
+                        />
+
+                        <!-- 개발팀 (위험) -->
+                        <path
+                          d="M 0,90 L 80,110 L 160,125 L 240,135 L 320,140"
+                          stroke="#dc2626"
+                          stroke-width="3"
+                          fill="none"
+                          stroke-linecap="round"
+                        />
+
+                        <!-- 영업팀 (주의) -->
+                        <path
+                          d="M 0,130 L 80,125 L 160,120 L 240,118 L 320,115"
+                          stroke="#9333ea"
+                          stroke-width="3"
+                          fill="none"
+                          stroke-linecap="round"
+                        />
+                      </svg>
+
+                      <div
+                        style="
+                          position: absolute;
+                          bottom: -5px;
+                          left: 20px;
+                          font-size: 12px;
+                          color: #64748b;
+                          text-align: center;
+                        "
+                      >
+                        월
+                      </div>
+                      <div
+                        style="
+                          position: absolute;
+                          bottom: -5px;
+                          left: 95px;
+                          font-size: 12px;
+                          color: #64748b;
+                          text-align: center;
+                        "
+                      >
+                        화
+                      </div>
+                      <div
+                        style="
+                          position: absolute;
+                          bottom: -5px;
+                          left: 175px;
+                          font-size: 12px;
+                          color: #64748b;
+                          text-align: center;
+                        "
+                      >
+                        수
+                      </div>
+                      <div
+                        style="
+                          position: absolute;
+                          bottom: -5px;
+                          left: 255px;
+                          font-size: 12px;
+                          color: #64748b;
+                          text-align: center;
+                        "
+                      >
+                        목
+                      </div>
+                      <div
+                        style="
+                          position: absolute;
+                          bottom: -5px;
+                          left: 335px;
+                          font-size: 12px;
+                          color: #64748b;
+                          text-align: center;
+                        "
+                      >
+                        금
+                      </div>
+
+                      <div
+                        style="
+                          position: absolute;
+                          top: 20px;
+                          right: 20px;
+                          background: rgba(255, 255, 255, 0.9);
+                          padding: 10px;
+                          border-radius: 6px;
+                          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                        "
+                      >
+                        <div
+                          style="
+                            font-size: 12px;
+                            color: #374151;
+                            font-weight: 500;
+                            margin-bottom: 8px;
+                          "
+                        >
+                          팀별 웰빙지수
+                        </div>
+                        <div
+                          style="
+                            display: flex;
+                            align-items: center;
+                            margin-bottom: 3px;
+                          "
+                        >
+                          <div
+                            style="
+                              width: 12px;
+                              height: 2px;
+                              background: #16a34a;
+                              margin-right: 6px;
+                            "
+                          ></div>
+                          <span style="font-size: 10px">인사팀</span>
+                        </div>
+                        <div
+                          style="
+                            display: flex;
+                            align-items: center;
+                            margin-bottom: 3px;
+                          "
+                        >
+                          <div
+                            style="
+                              width: 12px;
+                              height: 2px;
+                              background: #3b82f6;
+                              margin-right: 6px;
+                            "
+                          ></div>
+                          <span style="font-size: 10px">디자인팀</span>
+                        </div>
+                        <div
+                          style="
+                            display: flex;
+                            align-items: center;
+                            margin-bottom: 3px;
+                          "
+                        >
+                          <div
+                            style="
+                              width: 12px;
+                              height: 2px;
+                              background: #f59e0b;
+                              margin-right: 6px;
+                            "
+                          ></div>
+                          <span style="font-size: 10px">마케팅팀</span>
+                        </div>
+                        <div
+                          style="
+                            display: flex;
+                            align-items: center;
+                            margin-bottom: 3px;
+                          "
+                        >
+                          <div
+                            style="
+                              width: 12px;
+                              height: 2px;
+                              background: #dc2626;
+                              margin-right: 6px;
+                            "
+                          ></div>
+                          <span style="font-size: 10px">개발팀</span>
+                        </div>
+                        <div style="display: flex; align-items: center">
+                          <div
+                            style="
+                              width: 12px;
+                              height: 2px;
+                              background: #9333ea;
+                              margin-right: 6px;
+                            "
+                          ></div>
+                          <span style="font-size: 10px">영업팀</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Team Participation -->
+              <div class="chart-card">
+                <div class="chart-title">🏢 팀별 참여도</div>
+                <div class="progress-chart">
+                  <div class="progress-label">
+                    <span>인사팀 (12명)</span>
+                    <span class="trend-up">90%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill progress-green"
+                      style="width: 90%"
+                    ></div>
+                  </div>
+                </div>
+                <div class="progress-chart">
+                  <div class="progress-label">
+                    <span>개발팀 (68명)</span>
+                    <span class="trend-down">65%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill progress-red"
+                      style="width: 65%"
+                    ></div>
+                  </div>
+                </div>
+                <div class="progress-chart">
+                  <div class="progress-label">
+                    <span>디자인팀 (15명)</span>
+                    <span class="trend-stable">70%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill progress-blue"
+                      style="width: 70%"
+                    ></div>
+                  </div>
+                </div>
+                <div class="progress-chart">
+                  <div class="progress-label">
+                    <span>마케팅팀 (18명)</span>
+                    <span class="trend-down">60%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill progress-orange"
+                      style="width: 60%"
+                    ></div>
+                  </div>
+                </div>
+                <div class="progress-chart">
+                  <div class="progress-label">
+                    <span>영업팀 (22명)</span>
+                    <span class="trend-up">50%</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div
+                      class="progress-fill progress-purple"
+                      style="width: 50%"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Team Status Overview -->
+            <div class="chart-card">
+              <div class="chart-title">🎯 팀별 현황 요약</div>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(3, 1fr);
+                  gap: 20px;
+                  margin-top: 20px;
+                "
+              >
+                <div
+                  style="
+                    text-align: center;
+                    padding: 20px;
+                    background: #dcfce7;
+                    border-radius: 10px;
+                  "
+                >
+                  <div
+                    style="font-size: 24px; font-weight: bold; color: #16a34a"
+                  >
+                    우수팀
+                  </div>
+                  <div style="font-size: 14px; color: #6b7280; margin: 8px 0">
+                    인사팀 (1개)
+                  </div>
+                  <div style="font-size: 12px; color: #15803d">
+                    웰빙지수 8+ 달성
+                  </div>
+                </div>
+                <div
+                  style="
+                    text-align: center;
+                    padding: 20px;
+                    background: #fef3c7;
+                    border-radius: 10px;
+                  "
+                >
+                  <div
+                    style="font-size: 24px; font-weight: bold; color: #f59e0b"
+                  >
+                    주의팀
+                  </div>
+                  <div style="font-size: 14px; color: #6b7280; margin: 8px 0">
+                    마케팅팀, 영업팀 (2개)
+                  </div>
+                  <div style="font-size: 12px; color: #92400e">
+                    참여율 70% 미만
+                  </div>
+                </div>
+                <div
+                  style="
+                    text-align: center;
+                    padding: 20px;
+                    background: #fecaca;
+                    border-radius: 10px;
+                  "
+                >
+                  <div
+                    style="font-size: 24px; font-weight: bold; color: #dc2626"
+                  >
+                    위험팀
+                  </div>
+                  <div style="font-size: 14px; color: #6b7280; margin: 8px 0">
+                    개발팀 (1개)
+                  </div>
+                  <div style="font-size: 12px; color: #991b1b">
+                    긴급 개입 필요
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Token Management Tab -->
+          <div id="tokens" class="tab-content">
+            <h2 style="margin-bottom: 25px; color: #f59e0b">🏆 토큰 관리</h2>
+
+            <!-- Token Economy Overview -->
+            <div
+              style="
+                background: linear-gradient(135deg, #fef3c7 0%, #fcd34d 100%);
+                border-radius: 12px;
+                padding: 25px;
+                margin-bottom: 25px;
+              "
+            >
+              <h3 style="color: #92400e; margin-bottom: 15px">
+                💰 토큰 경제 현황
+              </h3>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(4, 1fr);
+                  gap: 20px;
+                "
+              >
+                <div
+                  style="
+                    text-align: center;
+                    background: rgba(255, 255, 255, 0.8);
+                    padding: 15px;
+                    border-radius: 10px;
+                  "
+                >
+                  <div
+                    style="font-size: 24px; font-weight: bold; color: #92400e"
+                  >
+                    24,580
+                  </div>
+                  <div style="font-size: 12px; color: #78716c">
+                    총 발행 토큰
+                  </div>
+                </div>
+                <div
+                  style="
+                    text-align: center;
+                    background: rgba(255, 255, 255, 0.8);
+                    padding: 15px;
+                    border-radius: 10px;
+                  "
+                >
+                  <div
+                    style="font-size: 24px; font-weight: bold; color: #92400e"
+                  >
+                    18,340
+                  </div>
+                  <div style="font-size: 12px; color: #78716c">사용된 토큰</div>
+                </div>
+                <div
+                  style="
+                    text-align: center;
+                    background: rgba(255, 255, 255, 0.8);
+                    padding: 15px;
+                    border-radius: 10px;
+                  "
+                >
+                  <div
+                    style="font-size: 24px; font-weight: bold; color: #92400e"
+                  >
+                    6,240
+                  </div>
+                  <div style="font-size: 12px; color: #78716c">보유 토큰</div>
+                </div>
+                <div
+                  style="
+                    text-align: center;
+                    background: rgba(255, 255, 255, 0.8);
+                    padding: 15px;
+                    border-radius: 10px;
+                  "
+                >
+                  <div
+                    style="font-size: 24px; font-weight: bold; color: #92400e"
+                  >
+                    75%
+                  </div>
+                  <div style="font-size: 12px; color: #78716c">활용률</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Token Activities Management -->
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                margin-bottom: 25px;
+              "
+            >
+              <!-- Token Earning Activities -->
+              <div class="chart-card">
+                <div class="chart-title">📈 토큰 획득 활동 관리</div>
+                <table style="width: 100%; border-collapse: collapse">
+                  <thead>
+                    <tr style="background: #f8f9fa">
+                      <th
+                        style="
+                          padding: 10px;
+                          text-align: left;
+                          border-bottom: 2px solid #dee2e6;
+                        "
+                      >
+                        활동
+                      </th>
+                      <th
+                        style="
+                          padding: 10px;
+                          text-align: left;
+                          border-bottom: 2px solid #dee2e6;
+                        "
+                      >
+                        토큰/회
+                      </th>
+                      <th
+                        style="
+                          padding: 10px;
+                          text-align: left;
+                          border-bottom: 2px solid #dee2e6;
+                        "
+                      >
+                        주간 총량
+                      </th>
+                      <th
+                        style="
+                          padding: 10px;
+                          text-align: left;
+                          border-bottom: 2px solid #dee2e6;
+                        "
+                      >
+                        관리
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        일일 체크인
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        10
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        2,390
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <button
+                          style="
+                            background: #16a34a;
+                            color: white;
+                            border: none;
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            cursor: pointer;
+                          "
+                        >
+                          정상
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        목표 달성
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        50
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        1,250
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <button
+                          style="
+                            background: #f59e0b;
+                            color: white;
+                            border: none;
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            cursor: pointer;
+                          "
+                        >
+                          조정필요
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        동료 도움
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        15
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        680
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <button
+                          style="
+                            background: #3b82f6;
+                            color: white;
+                            border: none;
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            cursor: pointer;
+                          "
+                        >
+                          활성화
+                        </button>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        카드 레벨업
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        25
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        420
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <button
+                          style="
+                            background: #16a34a;
+                            color: white;
+                            border: none;
+                            padding: 4px 8px;
+                            border-radius: 4px;
+                            cursor: pointer;
+                          "
+                        >
+                          정상
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Token Shop Management -->
+              <div class="chart-card">
+                <div class="chart-title">🛒 토큰샵 상품 관리</div>
+                <div style="space-y: 10px">
+                  <div
+                    style="
+                      padding: 12px;
+                      background: #f8f9fa;
+                      border-radius: 8px;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                      "
+                    >
+                      <div>
+                        <div style="font-weight: 500">☕ 아메리카노 쿠폰</div>
+                        <div style="font-size: 12px; color: #6b7280">
+                          30 토큰
+                        </div>
+                      </div>
+                      <div style="text-align: right">
+                        <div style="font-size: 14px; font-weight: bold">
+                          재고: 50개
+                        </div>
+                        <div style="font-size: 12px; color: #16a34a">
+                          주간 판매: 23개
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      padding: 12px;
+                      background: #fef2f2;
+                      border-radius: 8px;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                      "
+                    >
+                      <div>
+                        <div style="font-weight: 500">🥤 건강음료 세트</div>
+                        <div style="font-size: 12px; color: #6b7280">
+                          80 토큰
+                        </div>
+                      </div>
+                      <div style="text-align: right">
+                        <div
+                          style="
+                            font-size: 14px;
+                            font-weight: bold;
+                            color: #dc2626;
+                          "
+                        >
+                          재고: 3개
+                        </div>
+                        <div style="font-size: 12px; color: #dc2626">
+                          주간 판매: 12개
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      padding: 12px;
+                      background: #f8f9fa;
+                      border-radius: 8px;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                      "
+                    >
+                      <div>
+                        <div style="font-weight: 500">🍓 간식 박스</div>
+                        <div style="font-size: 12px; color: #6b7280">
+                          120 토큰
+                        </div>
+                      </div>
+                      <div style="text-align: right">
+                        <div style="font-size: 14px; font-weight: bold">
+                          재고: 25개
+                        </div>
+                        <div style="font-size: 12px; color: #16a34a">
+                          주간 판매: 8개
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    style="
+                      background: #3b82f6;
+                      color: white;
+                      border: none;
+                      padding: 10px 20px;
+                      border-radius: 6px;
+                      cursor: pointer;
+                      width: 100%;
+                    "
+                  >
+                    + 새 상품 추가
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Token Distribution & Special Actions -->
+            <div class="chart-card">
+              <div class="chart-title">⚡ 특별 토큰 지급 & 이벤트</div>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1fr 1fr;
+                  gap: 20px;
+                "
+              >
+                <div
+                  style="
+                    padding: 20px;
+                    background: #fef3c7;
+                    border-radius: 10px;
+                    text-align: center;
+                  "
+                >
+                  <div style="font-size: 18px; margin-bottom: 10px">🎁</div>
+                  <div style="font-weight: bold; margin-bottom: 8px">
+                    전체 보상
+                  </div>
+                  <div
+                    style="font-size: 12px; color: #92400e; margin-bottom: 15px"
+                  >
+                    모든 사용자에게 토큰 지급
+                  </div>
+                  <input
+                    type="number"
+                    placeholder="토큰 수량"
+                    style="
+                      width: 100%;
+                      padding: 8px;
+                      border: 1px solid #d1d5db;
+                      border-radius: 4px;
+                      margin-bottom: 10px;
+                    "
+                  />
+                  <button
+                    style="
+                      background: #f59e0b;
+                      color: white;
+                      border: none;
+                      padding: 8px 16px;
+                      border-radius: 4px;
+                      cursor: pointer;
+                      width: 100%;
+                    "
+                  >
+                    지급
+                  </button>
+                </div>
+                <div
+                  style="
+                    padding: 20px;
+                    background: #dbeafe;
+                    border-radius: 10px;
+                    text-align: center;
+                  "
+                >
+                  <div style="font-size: 18px; margin-bottom: 10px">🏢</div>
+                  <div style="font-weight: bold; margin-bottom: 8px">
+                    부서별 보상
+                  </div>
+                  <div
+                    style="font-size: 12px; color: #1e40af; margin-bottom: 15px"
+                  >
+                    특정 부서에 토큰 지급
+                  </div>
+                  <select
+                    style="
+                      width: 100%;
+                      padding: 8px;
+                      border: 1px solid #d1d5db;
+                      border-radius: 4px;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    <option>부서 선택</option>
+                    <option>개발팀</option>
+                    <option>디자인팀</option>
+                    <option>마케팅팀</option>
+                  </select>
+                  <input
+                    type="number"
+                    placeholder="토큰 수량"
+                    style="
+                      width: 100%;
+                      padding: 8px;
+                      border: 1px solid #d1d5db;
+                      border-radius: 4px;
+                      margin-bottom: 10px;
+                    "
+                  />
+                  <button
+                    style="
+                      background: #3b82f6;
+                      color: white;
+                      border: none;
+                      padding: 8px 16px;
+                      border-radius: 4px;
+                      cursor: pointer;
+                      width: 100%;
+                    "
+                  >
+                    지급
+                  </button>
+                </div>
+                <div
+                  style="
+                    padding: 20px;
+                    background: #f3e8ff;
+                    border-radius: 10px;
+                    text-align: center;
+                  "
+                >
+                  <div style="font-size: 18px; margin-bottom: 10px">👑</div>
+                  <div style="font-weight: bold; margin-bottom: 8px">
+                    개별 보상
+                  </div>
+                  <div
+                    style="font-size: 12px; color: #7c3aed; margin-bottom: 15px"
+                  >
+                    특정 사용자에게 토큰 지급
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="사용자 검색"
+                    style="
+                      width: 100%;
+                      padding: 8px;
+                      border: 1px solid #d1d5db;
+                      border-radius: 4px;
+                      margin-bottom: 8px;
+                    "
+                  />
+                  <input
+                    type="number"
+                    placeholder="토큰 수량"
+                    style="
+                      width: 100%;
+                      padding: 8px;
+                      border: 1px solid #d1d5db;
+                      border-radius: 4px;
+                      margin-bottom: 10px;
+                    "
+                  />
+                  <button
+                    style="
+                      background: #7c3aed;
+                      color: white;
+                      border: none;
+                      padding: 8px 16px;
+                      border-radius: 4px;
+                      cursor: pointer;
+                      width: 100%;
+                    "
+                  >
+                    지급
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analytics Tab -->
+          <div id="analytics" class="tab-content">
+            <h2 style="margin-bottom: 25px; color: #7c3aed">📈 분석</h2>
+
+            <!-- Analysis Period Selector -->
+            <div class="chart-card" style="margin-bottom: 25px">
+              <div
+                style="
+                  display: flex;
+                  justify-content: between;
+                  align-items: center;
+                "
+              >
+                <div class="chart-title">📊 분석 기간 설정</div>
+                <div style="display: flex; gap: 10px">
+                  <button
+                    style="
+                      background: #3b82f6;
+                      color: white;
+                      border: none;
+                      padding: 8px 16px;
+                      border-radius: 6px;
+                      cursor: pointer;
+                    "
+                  >
+                    일간
+                  </button>
+                  <button
+                    style="
+                      background: #f3f4f6;
+                      color: #374151;
+                      border: 1px solid #d1d5db;
+                      padding: 8px 16px;
+                      border-radius: 6px;
+                      cursor: pointer;
+                    "
+                  >
+                    주간
+                  </button>
+                  <button
+                    style="
+                      background: #f3f4f6;
+                      color: #374151;
+                      border: 1px solid #d1d5db;
+                      padding: 8px 16px;
+                      border-radius: 6px;
+                      cursor: pointer;
+                    "
+                  >
+                    월간
+                  </button>
+                  <button
+                    style="
+                      background: #f3f4f6;
+                      color: #374151;
+                      border: 1px solid #d1d5db;
+                      padding: 8px 16px;
+                      border-radius: 6px;
+                      cursor: pointer;
+                    "
+                  >
+                    분기
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Key Metrics Grid -->
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+                margin-bottom: 25px;
+              "
+            >
+              <div class="chart-card">
+                <div class="chart-title">📱 사용자 참여도 분석</div>
+                <div
+                  style="
+                    height: 200px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                  "
+                >
+                  <div style="text-align: center">
+                    <div
+                      style="
+                        font-size: 32px;
+                        font-weight: bold;
+                        color: #3b82f6;
+                        margin-bottom: 10px;
+                      "
+                    >
+                      78%
+                    </div>
+                    <div style="font-size: 14px; color: #6b7280">
+                      평균 참여율
+                    </div>
+                    <div
+                      style="font-size: 12px; color: #16a34a; margin-top: 5px"
+                    >
+                      ↗ +5.2% (전주 대비)
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-top: 15px">
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 12px;
+                      margin-bottom: 5px;
+                    "
+                  >
+                    <span>일일 체크인</span>
+                    <span>87%</span>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 12px;
+                      margin-bottom: 5px;
+                    "
+                  >
+                    <span>목표 설정</span>
+                    <span>65%</span>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 12px;
+                    "
+                  >
+                    <span>동료 소통</span>
+                    <span>43%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chart-card">
+                <div class="chart-title">💚 웰빙 지수 트렌드</div>
+                <div
+                  style="
+                    height: 200px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                  "
+                >
+                  <div style="text-align: center">
+                    <div
+                      style="
+                        font-size: 32px;
+                        font-weight: bold;
+                        color: #16a34a;
+                        margin-bottom: 10px;
+                      "
+                    >
+                      6.2
+                    </div>
+                    <div style="font-size: 14px; color: #6b7280">
+                      평균 웰빙 지수
+                    </div>
+                    <div
+                      style="font-size: 12px; color: #16a34a; margin-top: 5px"
+                    >
+                      ↗ +0.3 (전주 대비)
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-top: 15px">
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 12px;
+                      margin-bottom: 5px;
+                    "
+                  >
+                    <span>8-10점 (우수)</span>
+                    <span>26%</span>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 12px;
+                      margin-bottom: 5px;
+                    "
+                  >
+                    <span>6-8점 (양호)</span>
+                    <span>46%</span>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 12px;
+                    "
+                  >
+                    <span>4점 미만 (주의)</span>
+                    <span>5%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chart-card">
+                <div class="chart-title">🎯 목표 달성률</div>
+                <div
+                  style="
+                    height: 200px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: #f8f9fa;
+                    border-radius: 8px;
+                  "
+                >
+                  <div style="text-align: center">
+                    <div
+                      style="
+                        font-size: 32px;
+                        font-weight: bold;
+                        color: #f59e0b;
+                        margin-bottom: 10px;
+                      "
+                    >
+                      67%
+                    </div>
+                    <div style="font-size: 14px; color: #6b7280">
+                      주간 목표 달성률
+                    </div>
+                    <div
+                      style="font-size: 12px; color: #dc2626; margin-top: 5px"
+                    >
+                      ↘ -2.1% (전주 대비)
+                    </div>
+                  </div>
+                </div>
+                <div style="margin-top: 15px">
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 12px;
+                      margin-bottom: 5px;
+                    "
+                  >
+                    <span>완전 달성</span>
+                    <span>67%</span>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 12px;
+                      margin-bottom: 5px;
+                    "
+                  >
+                    <span>부분 달성</span>
+                    <span>23%</span>
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 12px;
+                    "
+                  >
+                    <span>미달성</span>
+                    <span>10%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Detailed Analytics -->
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                gap: 20px;
+                margin-bottom: 25px;
+              "
+            >
+              <div class="chart-card">
+                <div class="chart-title">📊 부서별 상세 분석</div>
+                <table style="width: 100%; border-collapse: collapse">
+                  <thead>
+                    <tr style="background: #f8f9fa">
+                      <th
+                        style="
+                          padding: 12px;
+                          text-align: left;
+                          border-bottom: 2px solid #dee2e6;
+                        "
+                      >
+                        부서
+                      </th>
+                      <th
+                        style="
+                          padding: 12px;
+                          text-align: left;
+                          border-bottom: 2px solid #dee2e6;
+                        "
+                      >
+                        참여율
+                      </th>
+                      <th
+                        style="
+                          padding: 12px;
+                          text-align: left;
+                          border-bottom: 2px solid #dee2e6;
+                        "
+                      >
+                        웰빙지수
+                      </th>
+                      <th
+                        style="
+                          padding: 12px;
+                          text-align: left;
+                          border-bottom: 2px solid #dee2e6;
+                        "
+                      >
+                        목표달성
+                      </th>
+                      <th
+                        style="
+                          padding: 12px;
+                          text-align: left;
+                          border-bottom: 2px solid #dee2e6;
+                        "
+                      >
+                        토큰활용
+                      </th>
+                      <th
+                        style="
+                          padding: 12px;
+                          text-align: left;
+                          border-bottom: 2px solid #dee2e6;
+                        "
+                      >
+                        트렌드
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td
+                        style="
+                          padding: 12px;
+                          border-bottom: 1px solid #dee2e6;
+                          font-weight: 500;
+                        "
+                      >
+                        인사팀
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #16a34a; font-weight: bold"
+                          >90%</span
+                        >
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #16a34a; font-weight: bold"
+                          >8.1</span
+                        >
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #16a34a; font-weight: bold"
+                          >85%</span
+                        >
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        89%
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #16a34a">↗ 개선</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style="
+                          padding: 12px;
+                          border-bottom: 1px solid #dee2e6;
+                          font-weight: 500;
+                        "
+                      >
+                        개발팀
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #3b82f6; font-weight: bold"
+                          >85%</span
+                        >
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #dc2626; font-weight: bold"
+                          >4.8</span
+                        >
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #f59e0b; font-weight: bold"
+                          >62%</span
+                        >
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        68%
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #dc2626">↘ 악화</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style="
+                          padding: 12px;
+                          border-bottom: 1px solid #dee2e6;
+                          font-weight: 500;
+                        "
+                      >
+                        디자인팀
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #f59e0b; font-weight: bold"
+                          >70%</span
+                        >
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #f59e0b; font-weight: bold"
+                          >6.3</span
+                        >
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #f59e0b; font-weight: bold"
+                          >71%</span
+                        >
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        72%
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #f59e0b">→ 유지</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style="
+                          padding: 12px;
+                          border-bottom: 1px solid #dee2e6;
+                          font-weight: 500;
+                        "
+                      >
+                        마케팅팀
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #f59e0b; font-weight: bold"
+                          >60%</span
+                        >
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #f59e0b; font-weight: bold"
+                          >5.9</span
+                        >
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #f59e0b; font-weight: bold"
+                          >58%</span
+                        >
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        45%
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #dc2626">↘ 주의</span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style="
+                          padding: 12px;
+                          border-bottom: 1px solid #dee2e6;
+                          font-weight: 500;
+                        "
+                      >
+                        영업팀
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #dc2626; font-weight: bold"
+                          >50%</span
+                        >
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #f59e0b; font-weight: bold"
+                          >5.5</span
+                        >
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #dc2626; font-weight: bold"
+                          >45%</span
+                        >
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        34%
+                      </td>
+                      <td
+                        style="padding: 12px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span style="color: #16a34a">↗ 개선</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="chart-card">
+                <div class="chart-title">🔍 인사이트 요약</div>
+                <div style="space-y: 15px">
+                  <div
+                    style="
+                      padding: 12px;
+                      background: #dcfce7;
+                      border-radius: 8px;
+                      margin-bottom: 12px;
+                    "
+                  >
+                    <div
+                      style="
+                        font-weight: bold;
+                        color: #166534;
+                        margin-bottom: 5px;
+                      "
+                    >
+                      ✅ 주요 성과
+                    </div>
+                    <div style="font-size: 13px; color: #15803d">
+                      • 인사팀 모든 지표 우수<br />
+                      • 전체 참여율 5% 상승<br />
+                      • 토큰 활용률 증가
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      padding: 12px;
+                      background: #fecaca;
+                      border-radius: 8px;
+                      margin-bottom: 12px;
+                    "
+                  >
+                    <div
+                      style="
+                        font-weight: bold;
+                        color: #991b1b;
+                        margin-bottom: 5px;
+                      "
+                    >
+                      ⚠️ 주의 사항
+                    </div>
+                    <div style="font-size: 13px; color: #dc2626">
+                      • 개발팀 웰빙지수 급락<br />
+                      • 영업팀 참여율 최저<br />
+                      • 목표달성률 전반적 하락
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      padding: 12px;
+                      background: #dbeafe;
+                      border-radius: 8px;
+                    "
+                  >
+                    <div
+                      style="
+                        font-weight: bold;
+                        color: #1e40af;
+                        margin-bottom: 5px;
+                      "
+                    >
+                      💡 권장 액션
+                    </div>
+                    <div style="font-size: 13px; color: #2563eb">
+                      • 개발팀 긴급 지원<br />
+                      • 영업팀 참여 독려<br />
+                      • 토큰 보상 확대
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Risk Management Tab -->
+          <div id="risk" class="tab-content">
+            <h2 style="margin-bottom: 25px; color: #e74c3c">
+              ⚠️ 팀별 위험 관리
+            </h2>
+
+            <!-- Alert Level Summary -->
+            <div
+              class="mini-stats"
+              style="margin-bottom: 25px; grid-template-columns: repeat(4, 1fr)"
+            >
+              <div
+                class="mini-stat"
+                style="background: #f8d7da; border-left: 4px solid #e74c3c"
+              >
+                <div class="mini-stat-value" style="color: #e74c3c">1개팀</div>
+                <div class="mini-stat-label">긴급 위험</div>
+              </div>
+              <div
+                class="mini-stat"
+                style="background: #fff3cd; border-left: 4px solid #f39c12"
+              >
+                <div class="mini-stat-value" style="color: #f39c12">2개팀</div>
+                <div class="mini-stat-label">주의 필요</div>
+              </div>
+              <div
+                class="mini-stat"
+                style="background: #d4edda; border-left: 4px solid #27ae60"
+              >
+                <div class="mini-stat-value" style="color: #27ae60">1개팀</div>
+                <div class="mini-stat-label">개선 완료</div>
+              </div>
+              <div
+                class="mini-stat"
+                style="background: #e2e3e5; border-left: 4px solid #6c757d"
+              >
+                <div class="mini-stat-value" style="color: #6c757d">85%</div>
+                <div class="mini-stat-label">개입 성공률</div>
+              </div>
+            </div>
+
+            <!-- Risk Alerts -->
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                margin-bottom: 25px;
+              "
+            >
+              <!-- Urgent Team Alerts -->
+              <div class="chart-card" style="border-left: 4px solid #e74c3c">
+                <div class="chart-title" style="color: #e74c3c">
+                  🚨 긴급 팀 위험 신호
+                </div>
+
+                <div
+                  style="
+                    padding: 15px;
+                    background: #fef2f2;
+                    border-radius: 8px;
+                    margin-bottom: 15px;
+                    border-left: 4px solid #ef4444;
+                  "
+                >
+                  <div
+                    style="
+                      font-weight: bold;
+                      color: #991b1b;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    개발팀 - 팀 번아웃 위험
+                  </div>
+                  <div
+                    style="font-size: 14px; color: #7f1d1d; margin-bottom: 10px"
+                  >
+                    • 팀 평균 웰빙지수 3주 연속 하락 (6.2 → 4.8)<br />
+                    • 팀 체크인율 급락 (85% → 65%)<br />
+                    • 팀 평균 토큰보유량 최저 수준<br />
+                    • 주요 패턴: 야근 증가, 프로젝트 압박, 팀 소통 감소
+                  </div>
+                  <div style="display: flex; gap: 10px">
+                    <button
+                      style="
+                        background: #dc2626;
+                        color: white;
+                        border: none;
+                        padding: 8px 16px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                      "
+                    >
+                      팀 긴급개입
+                    </button>
+                    <button
+                      style="
+                        background: #2563eb;
+                        color: white;
+                        border: none;
+                        padding: 8px 16px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                      "
+                    >
+                      팀장 미팅
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  style="
+                    padding: 15px;
+                    background: #fffbeb;
+                    border-radius: 8px;
+                    border-left: 4px solid #f59e0b;
+                  "
+                >
+                  <div
+                    style="
+                      font-weight: bold;
+                      color: #92400e;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    마케팅팀 - 팀 참여도 저하
+                  </div>
+                  <div
+                    style="font-size: 14px; color: #78716c; margin-bottom: 10px"
+                  >
+                    • 팀 체크인율 지속 하락 (75% → 60%)<br />
+                    • 팀 목표달성률 평균 이하 (58%)<br />
+                    • 팀 동료 소통 참여율 낮음 (20%)<br />
+                    • 주요 패턴: 개별 업무 집중, 팀 응집력 부족
+                  </div>
+                  <div style="display: flex; gap: 10px">
+                    <button
+                      style="
+                        background: #f59e0b;
+                        color: white;
+                        border: none;
+                        padding: 8px 16px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                      "
+                    >
+                      팀 개선계획
+                    </button>
+                    <button
+                      style="
+                        background: #7c3aed;
+                        color: white;
+                        border: none;
+                        padding: 8px 16px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                      "
+                    >
+                      팀빌딩 지원
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- AI Team Intervention Recommendations -->
+              <div class="chart-card" style="border-left: 4px solid #3b82f6">
+                <div class="chart-title" style="color: #3b82f6">
+                  🤖 AI 팀별 개입 추천
+                </div>
+
+                <div
+                  style="
+                    padding: 15px;
+                    background: #eff6ff;
+                    border-radius: 8px;
+                    margin-bottom: 15px;
+                  "
+                >
+                  <div
+                    style="
+                      font-weight: bold;
+                      color: #1e40af;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    예측 모델 결과 (팀 단위)
+                  </div>
+                  <div
+                    style="font-size: 14px; color: #1e3a8a; margin-bottom: 10px"
+                  >
+                    현재 추세 지속 시:<br />
+                    • 3주 후 개발팀 평균 이직의향 65% 상승<br />
+                    • 마케팅팀 팀 스트레스 40% 증가<br />
+                    • 전체 팀 생산성 12% 감소 예상
+                  </div>
+                </div>
+
+                <div
+                  style="
+                    padding: 15px;
+                    background: #f0fdf4;
+                    border-radius: 8px;
+                    margin-bottom: 15px;
+                  "
+                >
+                  <div
+                    style="
+                      font-weight: bold;
+                      color: #166534;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    권장 팀별 액션
+                  </div>
+                  <div style="font-size: 14px; color: #14532d">
+                    1. 개발팀: 워크로드 30% 재분배<br />
+                    2. 마케팅팀: 팀 토큰 보상 2배 지급<br />
+                    3. 전팀: 팀별 1:1 상담 세션 배정<br />
+                    4. 조직: 유연근무제 임시 도입
+                  </div>
+                </div>
+
+                <div
+                  style="padding: 15px; background: #fefce8; border-radius: 8px"
+                >
+                  <div
+                    style="
+                      font-weight: bold;
+                      color: #a16207;
+                      margin-bottom: 8px;
+                    "
+                  >
+                    중장기 팀 전략
+                  </div>
+                  <div style="font-size: 14px; color: #92400e">
+                    • 월요일 팀 체크인 미팅 정례화<br />
+                    • 팀별 CBT 아카데미 확장 교육<br />
+                    • 팀 멘토링 프로그램 강화<br />
+                    • 팀별 웰빙 토큰샵 상품 다양화
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Risk Tracking Table -->
+            <div class="chart-card">
+              <div class="chart-title">📊 팀별 위험 추적 현황</div>
+              <table
+                style="width: 100%; border-collapse: collapse; margin-top: 15px"
+              >
+                <thead>
+                  <tr style="background: #f8f9fa">
+                    <th
+                      style="
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 2px solid #dee2e6;
+                      "
+                    >
+                      팀명
+                    </th>
+                    <th
+                      style="
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 2px solid #dee2e6;
+                      "
+                    >
+                      위험 수준
+                    </th>
+                    <th
+                      style="
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 2px solid #dee2e6;
+                      "
+                    >
+                      지속 기간
+                    </th>
+                    <th
+                      style="
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 2px solid #dee2e6;
+                      "
+                    >
+                      개입 현황
+                    </th>
+                    <th
+                      style="
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 2px solid #dee2e6;
+                      "
+                    >
+                      효과
+                    </th>
+                    <th
+                      style="
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 2px solid #dee2e6;
+                      "
+                    >
+                      액션
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      개발팀
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <span
+                        style="
+                          background: #dc2626;
+                          color: white;
+                          padding: 4px 8px;
+                          border-radius: 12px;
+                          font-size: 12px;
+                        "
+                        >높음</span
+                      >
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      3주
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      진행중
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      -5%
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <button
+                        style="
+                          background: #dc2626;
+                          color: white;
+                          border: none;
+                          padding: 6px 12px;
+                          border-radius: 4px;
+                          cursor: pointer;
+                        "
+                      >
+                        강화
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      마케팅팀
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <span
+                        style="
+                          background: #f59e0b;
+                          color: white;
+                          padding: 4px 8px;
+                          border-radius: 12px;
+                          font-size: 12px;
+                        "
+                        >보통</span
+                      >
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      1주
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      계획수립
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      -
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <button
+                        style="
+                          background: #f59e0b;
+                          color: white;
+                          border: none;
+                          padding: 6px 12px;
+                          border-radius: 4px;
+                          cursor: pointer;
+                        "
+                      >
+                        모니터
+                      </button>
+                    </td>
+                  </tr>
+                  <tr style="background: #f8f9fa">
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      인사팀
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <span
+                        style="
+                          background: #10b981;
+                          color: white;
+                          padding: 4px 8px;
+                          border-radius: 12px;
+                          font-size: 12px;
+                        "
+                        >개선</span
+                      >
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      2주 전
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      완료
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      +21%
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <button
+                        style="
+                          background: #6b7280;
+                          color: white;
+                          border: none;
+                          padding: 6px 12px;
+                          border-radius: 4px;
+                          cursor: pointer;
+                        "
+                      >
+                        관찰
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Team Management Tab -->
+          <div id="teams" class="tab-content">
+            <h2 style="margin-bottom: 25px; color: #3b82f6">🏢 팀 관리</h2>
+
+            <!-- Team Stats -->
+            <div
+              class="mini-stats"
+              style="margin-bottom: 25px; grid-template-columns: repeat(4, 1fr)"
+            >
+              <div
+                class="mini-stat"
+                style="background: #dbeafe; border-left: 4px solid #3b82f6"
+              >
+                <div class="mini-stat-value" style="color: #1e40af">5개</div>
+                <div class="mini-stat-label">총 팀 수</div>
+              </div>
+              <div
+                class="mini-stat"
+                style="background: #dcfce7; border-left: 4px solid #16a34a"
+              >
+                <div class="mini-stat-value" style="color: #166534">67%</div>
+                <div class="mini-stat-label">평균 참여율</div>
+              </div>
+              <div
+                class="mini-stat"
+                style="background: #fef3c7; border-left: 4px solid #d97706"
+              >
+                <div class="mini-stat-value" style="color: #92400e">Lv.5.8</div>
+                <div class="mini-stat-label">평균 레벨</div>
+              </div>
+              <div
+                class="mini-stat"
+                style="background: #f3e8ff; border-left: 4px solid #9333ea"
+              >
+                <div class="mini-stat-value" style="color: #7c2d12">2개팀</div>
+                <div class="mini-stat-label">지원 필요</div>
+              </div>
+            </div>
+
+            <!-- Team List Table -->
+            <div class="chart-card">
+              <div class="chart-title">📋 팀별 현황</div>
+              <table
+                style="width: 100%; border-collapse: collapse; margin-top: 15px"
+              >
+                <thead>
+                  <tr style="background: #f8f9fa">
+                    <th
+                      style="
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 2px solid #dee2e6;
+                      "
+                    >
+                      팀명
+                    </th>
+                    <th
+                      style="
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 2px solid #dee2e6;
+                      "
+                    >
+                      인원
+                    </th>
+                    <th
+                      style="
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 2px solid #dee2e6;
+                      "
+                    >
+                      평균 레벨
+                    </th>
+                    <th
+                      style="
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 2px solid #dee2e6;
+                      "
+                    >
+                      평균 체크인율
+                    </th>
+                    <th
+                      style="
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 2px solid #dee2e6;
+                      "
+                    >
+                      평균 웰빙지수
+                    </th>
+                    <th
+                      style="
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 2px solid #dee2e6;
+                      "
+                    >
+                      평균 토큰
+                    </th>
+                    <th
+                      style="
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 2px solid #dee2e6;
+                      "
+                    >
+                      팀 상태
+                    </th>
+                    <th
+                      style="
+                        padding: 12px;
+                        text-align: left;
+                        border-bottom: 2px solid #dee2e6;
+                      "
+                    >
+                      액션
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <div style="display: flex; align-items: center">
+                        <div
+                          style="
+                            width: 32px;
+                            height: 32px;
+                            background: #16a34a;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            color: white;
+                            margin-right: 10px;
+                          "
+                        >
+                          인
+                        </div>
+                        <div>
+                          <div style="font-weight: 500">인사팀</div>
+                          <div style="font-size: 12px; color: #6b7280">
+                            팀장: 김팀장
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      12명
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      Lv.7.2
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      90%
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <span style="color: #16a34a; font-weight: bold">8.1</span>
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      1,890
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <span
+                        style="
+                          background: #dcfce7;
+                          color: #166534;
+                          padding: 4px 8px;
+                          border-radius: 12px;
+                          font-size: 12px;
+                        "
+                        >우수</span
+                      >
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <button
+                        style="
+                          background: #6b7280;
+                          color: white;
+                          border: none;
+                          padding: 4px 8px;
+                          border-radius: 4px;
+                          cursor: pointer;
+                          margin-right: 5px;
+                        "
+                      >
+                        상세
+                      </button>
+                      <button
+                        style="
+                          background: #f59e0b;
+                          color: white;
+                          border: none;
+                          padding: 4px 8px;
+                          border-radius: 4px;
+                          cursor: pointer;
+                        "
+                      >
+                        보상
+                      </button>
+                    </td>
+                  </tr>
+                  <tr style="background: #fef2f2">
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <div style="display: flex; align-items: center">
+                        <div
+                          style="
+                            width: 32px;
+                            height: 32px;
+                            background: #dc2626;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            color: white;
+                            margin-right: 10px;
+                          "
+                        >
+                          개
+                        </div>
+                        <div>
+                          <div style="font-weight: 500">개발팀</div>
+                          <div style="font-size: 12px; color: #dc2626">
+                            팀장: 이팀장
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      68명
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      Lv.5.8
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      65%
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <span style="color: #dc2626; font-weight: bold">4.8</span>
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      980
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <span
+                        style="
+                          background: #fecaca;
+                          color: #991b1b;
+                          padding: 4px 8px;
+                          border-radius: 12px;
+                          font-size: 12px;
+                        "
+                        >위험</span
+                      >
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <button
+                        style="
+                          background: #dc2626;
+                          color: white;
+                          border: none;
+                          padding: 4px 8px;
+                          border-radius: 4px;
+                          cursor: pointer;
+                          margin-right: 5px;
+                        "
+                      >
+                        긴급지원
+                      </button>
+                      <button
+                        style="
+                          background: #7c3aed;
+                          color: white;
+                          border: none;
+                          padding: 4px 8px;
+                          border-radius: 4px;
+                          cursor: pointer;
+                        "
+                      >
+                        개입계획
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <div style="display: flex; align-items: center">
+                        <div
+                          style="
+                            width: 32px;
+                            height: 32px;
+                            background: #3b82f6;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            color: white;
+                            margin-right: 10px;
+                          "
+                        >
+                          디
+                        </div>
+                        <div>
+                          <div style="font-weight: 500">디자인팀</div>
+                          <div style="font-size: 12px; color: #6b7280">
+                            팀장: 박팀장
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      15명
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      Lv.6.1
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      70%
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <span style="color: #f59e0b; font-weight: bold">6.3</span>
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      1,420
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <span
+                        style="
+                          background: #dbeafe;
+                          color: #1e40af;
+                          padding: 4px 8px;
+                          border-radius: 12px;
+                          font-size: 12px;
+                        "
+                        >양호</span
+                      >
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <button
+                        style="
+                          background: #6b7280;
+                          color: white;
+                          border: none;
+                          padding: 4px 8px;
+                          border-radius: 4px;
+                          cursor: pointer;
+                          margin-right: 5px;
+                        "
+                      >
+                        상세
+                      </button>
+                      <button
+                        style="
+                          background: #16a34a;
+                          color: white;
+                          border: none;
+                          padding: 4px 8px;
+                          border-radius: 4px;
+                          cursor: pointer;
+                        "
+                      >
+                        지원
+                      </button>
+                    </td>
+                  </tr>
+                  <tr style="background: #fffbeb">
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <div style="display: flex; align-items: center">
+                        <div
+                          style="
+                            width: 32px;
+                            height: 32px;
+                            background: #f59e0b;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            color: white;
+                            margin-right: 10px;
+                          "
+                        >
+                          마
+                        </div>
+                        <div>
+                          <div style="font-weight: 500">마케팅팀</div>
+                          <div style="font-size: 12px; color: #f59e0b">
+                            팀장: 최팀장
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      18명
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      Lv.5.4
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      60%
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <span style="color: #f59e0b; font-weight: bold">5.9</span>
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      1,180
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <span
+                        style="
+                          background: #fef3c7;
+                          color: #92400e;
+                          padding: 4px 8px;
+                          border-radius: 12px;
+                          font-size: 12px;
+                        "
+                        >주의</span
+                      >
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <button
+                        style="
+                          background: #f59e0b;
+                          color: white;
+                          border: none;
+                          padding: 4px 8px;
+                          border-radius: 4px;
+                          cursor: pointer;
+                          margin-right: 5px;
+                        "
+                      >
+                        모니터링
+                      </button>
+                      <button
+                        style="
+                          background: #16a34a;
+                          color: white;
+                          border: none;
+                          padding: 4px 8px;
+                          border-radius: 4px;
+                          cursor: pointer;
+                        "
+                      >
+                        지원
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <div style="display: flex; align-items: center">
+                        <div
+                          style="
+                            width: 32px;
+                            height: 32px;
+                            background: #7c3aed;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            color: white;
+                            margin-right: 10px;
+                          "
+                        >
+                          영
+                        </div>
+                        <div>
+                          <div style="font-weight: 500">영업팀</div>
+                          <div style="font-size: 12px; color: #6b7280">
+                            팀장: 정팀장
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      22명
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      Lv.4.9
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      50%
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <span style="color: #f59e0b; font-weight: bold">5.5</span>
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      890
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <span
+                        style="
+                          background: #fef3c7;
+                          color: #92400e;
+                          padding: 4px 8px;
+                          border-radius: 12px;
+                          font-size: 12px;
+                        "
+                        >주의</span
+                      >
+                    </td>
+                    <td style="padding: 12px; border-bottom: 1px solid #dee2e6">
+                      <button
+                        style="
+                          background: #f59e0b;
+                          color: white;
+                          border: none;
+                          padding: 4px 8px;
+                          border-radius: 4px;
+                          cursor: pointer;
+                          margin-right: 5px;
+                        "
+                      >
+                        개선계획
+                      </button>
+                      <button
+                        style="
+                          background: #16a34a;
+                          color: white;
+                          border: none;
+                          padding: 4px 8px;
+                          border-radius: 4px;
+                          cursor: pointer;
+                        "
+                      >
+                        지원
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
+              <!-- Team Performance Summary -->
+              <div
+                style="
+                  margin-top: 25px;
+                  padding: 20px;
+                  background: #f8f9fa;
+                  border-radius: 8px;
+                "
+              >
+                <h4 style="margin-bottom: 15px; color: #374151">
+                  📊 팀별 성과 요약
+                </h4>
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 20px;
+                  "
+                >
+                  <div style="text-align: center">
+                    <div
+                      style="font-size: 18px; font-weight: bold; color: #16a34a"
+                    >
+                      우수팀
+                    </div>
+                    <div style="font-size: 14px; color: #6b7280">
+                      인사팀 (1개)
+                    </div>
+                    <div style="font-size: 12px; color: #15803d">
+                      웰빙지수 8+ 달성
+                    </div>
+                  </div>
+                  <div style="text-align: center">
+                    <div
+                      style="font-size: 18px; font-weight: bold; color: #f59e0b"
+                    >
+                      주의팀
+                    </div>
+                    <div style="font-size: 14px; color: #6b7280">
+                      마케팅팀, 영업팀 (2개)
+                    </div>
+                    <div style="font-size: 12px; color: #92400e">
+                      참여율 70% 미만
+                    </div>
+                  </div>
+                  <div style="text-align: center">
+                    <div
+                      style="font-size: 18px; font-weight: bold; color: #dc2626"
+                    >
+                      위험팀
+                    </div>
+                    <div style="font-size: 14px; color: #6b7280">
+                      개발팀 (1개)
+                    </div>
+                    <div style="font-size: 12px; color: #991b1b">
+                      긴급 개입 필요
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Compliance Tab -->
+          <div id="compliance" class="tab-content">
+            <h2 style="margin-bottom: 25px; color: #6b7280">⚖️ 컴플라이언스</h2>
+
+            <!-- Compliance Status Overview -->
+            <div class="mini-stats" style="margin-bottom: 25px">
+              <div
+                class="mini-stat"
+                style="background: #dcfce7; border-left: 4px solid #16a34a"
+              >
+                <div class="mini-stat-value" style="color: #166534">100%</div>
+                <div class="mini-stat-label">법적 준수율</div>
+              </div>
+              <div
+                class="mini-stat"
+                style="background: #dbeafe; border-left: 4px solid #2563eb"
+              >
+                <div class="mini-stat-value" style="color: #1e40af">0</div>
+                <div class="mini-stat-label">위반 사항</div>
+              </div>
+              <div
+                class="mini-stat"
+                style="background: #f3e8ff; border-left: 4px solid #9333ea"
+              >
+                <div class="mini-stat-value" style="color: #7c2d12">15일</div>
+                <div class="mini-stat-label">마지막 감사</div>
+              </div>
+              <div
+                class="mini-stat"
+                style="background: #fef3c7; border-left: 4px solid #d97706"
+              >
+                <div class="mini-stat-value" style="color: #92400e">99.9%</div>
+                <div class="mini-stat-label">데이터 보호율</div>
+              </div>
+            </div>
+
+            <!-- Legal Compliance Grid -->
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                margin-bottom: 25px;
+              "
+            >
+              <!-- Major Disaster Punishment Act -->
+              <div class="chart-card" style="border-left: 4px solid #16a34a">
+                <div class="chart-title" style="color: #166534">
+                  🏛️ 중대재해처벌법 대응
+                </div>
+                <div
+                  style="
+                    padding: 15px;
+                    background: #f0fdf4;
+                    border-radius: 8px;
+                    margin-bottom: 15px;
+                  "
+                >
+                  <div
+                    style="
+                      font-weight: bold;
+                      color: #166534;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    ✅ 준수 현황
+                  </div>
+                  <div
+                    style="font-size: 14px; color: #15803d; line-height: 1.5"
+                  >
+                    • 정신건강 모니터링 시스템 운영 중<br />
+                    • 사업주 안전보건 확보 의무 이행<br />
+                    • 근로자 정신건강 예방조치 시행<br />
+                    • 위험성 평가 정기 실시 (분기별)
+                  </div>
+                </div>
+                <div
+                  style="
+                    padding: 15px;
+                    background: #fffbeb;
+                    border-radius: 8px;
+                    margin-bottom: 15px;
+                  "
+                >
+                  <div
+                    style="
+                      font-weight: bold;
+                      color: #92400e;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    📋 필수 기록 관리
+                  </div>
+                  <div style="font-size: 13px; color: #78716c">
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 5px;
+                      "
+                    >
+                      <span>정신건강 모니터링 기록</span>
+                      <span style="color: #16a34a; font-weight: bold"
+                        >✓ 자동생성</span
+                      >
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 5px;
+                      "
+                    >
+                      <span>위험성 평가 문서</span>
+                      <span style="color: #16a34a; font-weight: bold"
+                        >✓ 최신</span
+                      >
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 5px;
+                      "
+                    >
+                      <span>교육 실시 기록</span>
+                      <span style="color: #16a34a; font-weight: bold"
+                        >✓ 완료</span
+                      >
+                    </div>
+                    <div style="display: flex; justify-content: space-between">
+                      <span>개입 조치 이력</span>
+                      <span style="color: #16a34a; font-weight: bold"
+                        >✓ 문서화</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <button
+                  style="
+                    background: #16a34a;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  법적 증빙 자료 다운로드
+                </button>
+              </div>
+
+              <!-- Personal Information Protection -->
+              <div class="chart-card" style="border-left: 4px solid #3b82f6">
+                <div class="chart-title" style="color: #1e40af">
+                  🔒 개인정보보호법 준수
+                </div>
+                <div
+                  style="
+                    padding: 15px;
+                    background: #eff6ff;
+                    border-radius: 8px;
+                    margin-bottom: 15px;
+                  "
+                >
+                  <div
+                    style="
+                      font-weight: bold;
+                      color: #1e40af;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    🛡️ 데이터 보호 현황
+                  </div>
+                  <div
+                    style="font-size: 14px; color: #1e3a8a; line-height: 1.5"
+                  >
+                    • 완전 익명화 처리: 개인 식별 불가<br />
+                    • 블록체인 기반 데이터 분리<br />
+                    • 암호화 저장: AES-256 적용<br />
+                    • 접근 권한 통제: 역할 기반 관리
+                  </div>
+                </div>
+                <div
+                  style="
+                    padding: 15px;
+                    background: #fef2f2;
+                    border-radius: 8px;
+                    margin-bottom: 15px;
+                  "
+                >
+                  <div
+                    style="
+                      font-weight: bold;
+                      color: #991b1b;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    ⚠️ 보안 모니터링
+                  </div>
+                  <div style="font-size: 13px; color: #7f1d1d">
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 5px;
+                      "
+                    >
+                      <span>비정상 접근 시도</span>
+                      <span style="color: #16a34a; font-weight: bold">0건</span>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 5px;
+                      "
+                    >
+                      <span>데이터 유출 시도</span>
+                      <span style="color: #16a34a; font-weight: bold">0건</span>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 5px;
+                      "
+                    >
+                      <span>권한 남용 사례</span>
+                      <span style="color: #16a34a; font-weight: bold">0건</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between">
+                      <span>시스템 보안 점수</span>
+                      <span style="color: #16a34a; font-weight: bold"
+                        >99.9/100</span
+                      >
+                    </div>
+                  </div>
+                </div>
+                <button
+                  style="
+                    background: #3b82f6;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    width: 100%;
+                  "
+                >
+                  보안 감사 보고서
+                </button>
+              </div>
+            </div>
+
+            <!-- Industrial Safety and Health Act -->
+            <div
+              class="chart-card"
+              style="margin-bottom: 25px; border-left: 4px solid #7c3aed"
+            >
+              <div class="chart-title" style="color: #7c2d12">
+                ⚕️ 산업안전보건법 준수
+              </div>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: 1fr 1fr 1fr;
+                  gap: 20px;
+                "
+              >
+                <div
+                  style="padding: 15px; background: #f3e8ff; border-radius: 8px"
+                >
+                  <div
+                    style="
+                      font-weight: bold;
+                      color: #7c2d12;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    📊 정신건강 검진
+                  </div>
+                  <div style="font-size: 13px; color: #6b21a8">
+                    • 연 1회 정신건강 검진 실시<br />
+                    • 고위험군 사후관리 프로그램<br />
+                    • 검진 결과 비밀보장 철저<br />
+                    • 의료진 연계 상담 지원
+                  </div>
+                  <div style="margin-top: 10px; text-align: center">
+                    <div
+                      style="font-size: 20px; font-weight: bold; color: #7c2d12"
+                    >
+                      97%
+                    </div>
+                    <div style="font-size: 11px; color: #6b21a8">
+                      검진 이수율
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="padding: 15px; background: #f0f9ff; border-radius: 8px"
+                >
+                  <div
+                    style="
+                      font-weight: bold;
+                      color: #0369a1;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    🏥 직무스트레스 평가
+                  </div>
+                  <div style="font-size: 13px; color: #0c4a6e">
+                    • KOSS 측정도구 활용<br />
+                    • 부서별 위험도 분석<br />
+                    • 개선 계획 수립 및 시행<br />
+                    • 분기별 평가 실시
+                  </div>
+                  <div style="margin-top: 10px; text-align: center">
+                    <div
+                      style="font-size: 20px; font-weight: bold; color: #0369a1"
+                    >
+                      4회
+                    </div>
+                    <div style="font-size: 11px; color: #0c4a6e">
+                      연간 평가 횟수
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style="padding: 15px; background: #f0fdf4; border-radius: 8px"
+                >
+                  <div
+                    style="
+                      font-weight: bold;
+                      color: #166534;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    🎓 안전보건교육
+                  </div>
+                  <div style="font-size: 13px; color: #15803d">
+                    • 정신건강 인식 교육<br />
+                    • 스트레스 관리 교육<br />
+                    • 관리자 대상 특별 교육<br />
+                    • 신입사원 필수 교육
+                  </div>
+                  <div style="margin-top: 10px; text-align: center">
+                    <div
+                      style="font-size: 20px; font-weight: bold; color: #166534"
+                    >
+                      8시간
+                    </div>
+                    <div style="font-size: 11px; color: #15803d">
+                      연간 교육 시간
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Audit History and Certification -->
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                margin-bottom: 25px;
+              "
+            >
+              <div class="chart-card">
+                <div class="chart-title">📅 감사 및 점검 이력</div>
+                <table style="width: 100%; border-collapse: collapse">
+                  <thead>
+                    <tr style="background: #f8f9fa">
+                      <th
+                        style="
+                          padding: 10px;
+                          text-align: left;
+                          border-bottom: 2px solid #dee2e6;
+                        "
+                      >
+                        날짜
+                      </th>
+                      <th
+                        style="
+                          padding: 10px;
+                          text-align: left;
+                          border-bottom: 2px solid #dee2e6;
+                        "
+                      >
+                        유형
+                      </th>
+                      <th
+                        style="
+                          padding: 10px;
+                          text-align: left;
+                          border-bottom: 2px solid #dee2e6;
+                        "
+                      >
+                        기관
+                      </th>
+                      <th
+                        style="
+                          padding: 10px;
+                          text-align: left;
+                          border-bottom: 2px solid #dee2e6;
+                        "
+                      >
+                        결과
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        2025.05.22
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        개인정보보호
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        개보위
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span
+                          style="
+                            background: #dcfce7;
+                            color: #166534;
+                            padding: 2px 6px;
+                            border-radius: 8px;
+                            font-size: 11px;
+                          "
+                          >적합</span
+                        >
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        2025.04.15
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        산업안전보건
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        공단
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span
+                          style="
+                            background: #dcfce7;
+                            color: #166534;
+                            padding: 2px 6px;
+                            border-radius: 8px;
+                            font-size: 11px;
+                          "
+                          >우수</span
+                        >
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        2025.03.08
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        내부감사
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        내부
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span
+                          style="
+                            background: #dcfce7;
+                            color: #166534;
+                            padding: 2px 6px;
+                            border-radius: 8px;
+                            font-size: 11px;
+                          "
+                          >적합</span
+                        >
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        2025.01.20
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        ISO 27001
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        인증원
+                      </td>
+                      <td
+                        style="padding: 10px; border-bottom: 1px solid #dee2e6"
+                      >
+                        <span
+                          style="
+                            background: #dcfce7;
+                            color: #166534;
+                            padding: 2px 6px;
+                            border-radius: 8px;
+                            font-size: 11px;
+                          "
+                          >갱신</span
+                        >
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="chart-card">
+                <div class="chart-title">🏆 인증 및 자격</div>
+                <div style="space-y: 15px">
+                  <div
+                    style="
+                      padding: 12px;
+                      background: #f0fdf4;
+                      border-radius: 8px;
+                      border-left: 4px solid #16a34a;
+                      margin-bottom: 12px;
+                    "
+                  >
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                      "
+                    >
+                      <div>
+                        <div style="font-weight: bold; color: #166534">
+                          ISO 27001
+                        </div>
+                        <div style="font-size: 12px; color: #15803d">
+                          정보보안 관리체계
+                        </div>
+                      </div>
+                      <div style="text-align: right">
+                        <div style="font-size: 12px; color: #166534">유효</div>
+                        <div style="font-size: 11px; color: #15803d">
+                          ~2026.01
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      padding: 12px;
+                      background: #eff6ff;
+                      border-radius: 8px;
+                      border-left: 4px solid #3b82f6;
+                      margin-bottom: 12px;
+                    "
+                  >
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                      "
+                    >
+                      <div>
+                        <div style="font-weight: bold; color: #1e40af">
+                          ISMS-P
+                        </div>
+                        <div style="font-size: 12px; color: #1e3a8a">
+                          개인정보보호 관리체계
+                        </div>
+                      </div>
+                      <div style="text-align: right">
+                        <div style="font-size: 12px; color: #1e40af">유효</div>
+                        <div style="font-size: 11px; color: #1e3a8a">
+                          ~2025.12
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      padding: 12px;
+                      background: #f3e8ff;
+                      border-radius: 8px;
+                      border-left: 4px solid #7c3aed;
+                      margin-bottom: 12px;
+                    "
+                  >
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                      "
+                    >
+                      <div>
+                        <div style="font-weight: bold; color: #7c2d12">
+                          안전보건경영시스템
+                        </div>
+                        <div style="font-size: 12px; color: #6b21a8">
+                          KOSHA 18001
+                        </div>
+                      </div>
+                      <div style="text-align: right">
+                        <div style="font-size: 12px; color: #7c2d12">유효</div>
+                        <div style="font-size: 11px; color: #6b21a8">
+                          ~2025.09
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      padding: 12px;
+                      background: #fef3c7;
+                      border-radius: 8px;
+                      border-left: 4px solid #d97706;
+                    "
+                  >
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                      "
+                    >
+                      <div>
+                        <div style="font-weight: bold; color: #92400e">
+                          디지털치료기기
+                        </div>
+                        <div style="font-size: 12px; color: #78716c">
+                          식약처 허가
+                        </div>
+                      </div>
+                      <div style="text-align: right">
+                        <div style="font-size: 12px; color: #dc2626">
+                          심사중
+                        </div>
+                        <div style="font-size: 11px; color: #78716c">
+                          ~2025.08
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Legal Risk Assessment -->
+            <div class="chart-card" style="margin-bottom: 25px">
+              <div class="chart-title">⚖️ 법적 리스크 평가</div>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(4, 1fr);
+                  gap: 15px;
+                "
+              >
+                <div
+                  style="
+                    text-align: center;
+                    padding: 15px;
+                    background: #f0fdf4;
+                    border-radius: 10px;
+                  "
+                >
+                  <div style="font-size: 24px; margin-bottom: 8px">🟢</div>
+                  <div
+                    style="
+                      font-weight: bold;
+                      color: #166534;
+                      margin-bottom: 5px;
+                    "
+                  >
+                    매우 낮음
+                  </div>
+                  <div style="font-size: 12px; color: #15803d">
+                    중대재해처벌법
+                  </div>
+                </div>
+                <div
+                  style="
+                    text-align: center;
+                    padding: 15px;
+                    background: #f0fdf4;
+                    border-radius: 10px;
+                  "
+                >
+                  <div style="font-size: 24px; margin-bottom: 8px">🟢</div>
+                  <div
+                    style="
+                      font-weight: bold;
+                      color: #166534;
+                      margin-bottom: 5px;
+                    "
+                  >
+                    매우 낮음
+                  </div>
+                  <div style="font-size: 12px; color: #15803d">
+                    개인정보보호법
+                  </div>
+                </div>
+                <div
+                  style="
+                    text-align: center;
+                    padding: 15px;
+                    background: #f0fdf4;
+                    border-radius: 10px;
+                  "
+                >
+                  <div style="font-size: 24px; margin-bottom: 8px">🟢</div>
+                  <div
+                    style="
+                      font-weight: bold;
+                      color: #166534;
+                      margin-bottom: 5px;
+                    "
+                  >
+                    매우 낮음
+                  </div>
+                  <div style="font-size: 12px; color: #15803d">
+                    산업안전보건법
+                  </div>
+                </div>
+                <div
+                  style="
+                    text-align: center;
+                    padding: 15px;
+                    background: #fffbeb;
+                    border-radius: 10px;
+                  "
+                >
+                  <div style="font-size: 24px; margin-bottom: 8px">🟡</div>
+                  <div
+                    style="
+                      font-weight: bold;
+                      color: #92400e;
+                      margin-bottom: 5px;
+                    "
+                  >
+                    낮음
+                  </div>
+                  <div style="font-size: 12px; color: #78716c">의료기기법</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Items and Next Steps -->
+            <div
+              style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px"
+            >
+              <div class="chart-card">
+                <div class="chart-title">📋 컴플라이언스 액션 아이템</div>
+                <div style="space-y: 10px">
+                  <div
+                    style="
+                      padding: 12px;
+                      background: #fef3c7;
+                      border-radius: 8px;
+                      border-left: 4px solid #f59e0b;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    <div
+                      style="
+                        font-weight: bold;
+                        color: #92400e;
+                        margin-bottom: 5px;
+                      "
+                    >
+                      📅 예정 활동
+                    </div>
+                    <div style="font-size: 13px; color: #78716c">
+                      • ISMS-P 갱신 준비 (6개월 후)<br />
+                      • 분기별 위험성 평가 실시<br />
+                      • 연간 정신건강 교육 계획
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      padding: 12px;
+                      background: #eff6ff;
+                      border-radius: 8px;
+                      border-left: 4px solid #3b82f6;
+                      margin-bottom: 10px;
+                    "
+                  >
+                    <div
+                      style="
+                        font-weight: bold;
+                        color: #1e40af;
+                        margin-bottom: 5px;
+                      "
+                    >
+                      🔄 진행중
+                    </div>
+                    <div style="font-size: 13px; color: #1e3a8a">
+                      • 디지털치료기기 식약처 허가<br />
+                      • 블록체인 기반 데이터 분리<br />
+                      • AI 알고리즘 투명성 확보
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      padding: 12px;
+                      background: #f0fdf4;
+                      border-radius: 8px;
+                      border-left: 4px solid #16a34a;
+                    "
+                  >
+                    <div
+                      style="
+                        font-weight: bold;
+                        color: #166534;
+                        margin-bottom: 5px;
+                      "
+                    >
+                      ✅ 완료
+                    </div>
+                    <div style="font-size: 13px; color: #15803d">
+                      • Q1 내부 보안 감사<br />
+                      • 개인정보 처리방침 업데이트<br />
+                      • 중대재해 예방 계획 수립
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="chart-card">
+                <div class="chart-title">📞 컴플라이언스 지원</div>
+                <div style="space-y: 15px">
+                  <div
+                    style="
+                      padding: 15px;
+                      background: #f8f9fa;
+                      border-radius: 8px;
+                      text-align: center;
+                    "
+                  >
+                    <div
+                      style="
+                        font-weight: bold;
+                        color: #374151;
+                        margin-bottom: 10px;
+                      "
+                    >
+                      📞 비상 연락처
+                    </div>
+                    <div
+                      style="font-size: 13px; color: #6b7280; line-height: 1.5"
+                    >
+                      법무팀: 내선 2901<br />
+                      정보보호담당: 내선 2902<br />
+                      안전보건담당: 내선 2903
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      display: grid;
+                      grid-template-columns: 1fr 1fr;
+                      gap: 10px;
+                    "
+                  >
+                    <button
+                      style="
+                        background: #dc2626;
+                        color: white;
+                        border: none;
+                        padding: 10px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 12px;
+                      "
+                    >
+                      긴급신고
+                    </button>
+                    <button
+                      style="
+                        background: #f59e0b;
+                        color: white;
+                        border: none;
+                        padding: 10px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 12px;
+                      "
+                    >
+                      법무상담
+                    </button>
+                    <button
+                      style="
+                        background: #3b82f6;
+                        color: white;
+                        border: none;
+                        padding: 10px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 12px;
+                      "
+                    >
+                      보고서생성
+                    </button>
+                    <button
+                      style="
+                        background: #16a34a;
+                        color: white;
+                        border: none;
+                        padding: 10px;
+                        border-radius: 6px;
+                        cursor: pointer;
+                        font-size: 12px;
+                      "
+                    >
+                      증빙다운로드
+                    </button>
+                  </div>
+                  <div
+                    style="
+                      padding: 10px;
+                      background: #dbeafe;
+                      border-radius: 6px;
+                    "
+                  >
+                    <div
+                      style="
+                        font-size: 12px;
+                        color: #1e40af;
+                        text-align: center;
+                      "
+                    >
+                      <strong>다음 감사까지</strong><br />
+                      <span style="font-size: 16px; font-weight: bold"
+                        >127일</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+          <!-- Real-time Status -->
+          <div class="sidebar-section">
+            <h3>📊 실시간 현황</h3>
+            <div class="quick-stat">
+              <span class="stat-label">온라인 사용자</span>
+              <span class="stat-value">87명</span>
+            </div>
+            <div class="quick-stat">
+              <span class="stat-label">금일 체크인</span>
+              <span class="stat-value">298 / 342</span>
+            </div>
+            <div class="quick-stat">
+              <span class="stat-label">신규 가입</span>
+              <span class="stat-value">+3명</span>
+            </div>
+            <div class="quick-stat">
+              <span class="stat-label">활성 알림</span>
+              <span class="stat-value">12건</span>
+            </div>
+          </div>
+
+          <!-- System Health -->
+          <div class="sidebar-section">
+            <h3>⚙️ 시스템 상태</h3>
+            <div class="quick-stat">
+              <span class="stat-label">
+                <span class="status-indicator status-good"></span>
+                서버 상태
+              </span>
+              <span class="stat-value">정상</span>
+            </div>
+            <div class="quick-stat">
+              <span class="stat-label">
+                <span class="status-indicator status-good"></span>
+                데이터베이스
+              </span>
+              <span class="stat-value">99.8%</span>
+            </div>
+            <div class="quick-stat">
+              <span class="stat-label">
+                <span class="status-indicator status-warning"></span>
+                AI 엔진
+              </span>
+              <span class="stat-value">점검중</span>
+            </div>
+            <div class="quick-stat">
+              <span class="stat-label">
+                <span class="status-indicator status-good"></span>
+                토큰 시스템
+              </span>
+              <span class="stat-value">정상</span>
+            </div>
+          </div>
+
+          <!-- Quick Insights -->
+          <div class="sidebar-section">
+            <h3>💡 인사이트</h3>
+            <div
+              style="
+                background: #f8f9fa;
+                padding: 15px;
+                border-radius: 8px;
+                margin-bottom: 15px;
+              "
+            >
+              <div style="font-size: 14px; color: #2c3e50; margin-bottom: 8px">
+                <strong>주요 발견</strong>
+              </div>
+              <div style="font-size: 12px; color: #666; line-height: 1.4">
+                • 월요일 스트레스 지수 28%↑<br />
+                • 점심시간 후 감정 33%↑<br />
+                • 토큰 활용팀 스트레스 12%↓
+              </div>
+            </div>
+            <div style="background: #e8f5e8; padding: 15px; border-radius: 8px">
+              <div style="font-size: 14px; color: #27ae60; margin-bottom: 8px">
+                <strong>권장 액션</strong>
+              </div>
+              <div style="font-size: 12px; color: #666; line-height: 1.4">
+                • 월요일 팀 체크인 도입<br />
+                • 토큰샵 웰빙 상품 확대<br />
+                • 개발팀 워크로드 재검토
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="sidebar-section">
+            <h3>🔔 최근 활동</h3>
+            <div style="font-size: 13px; color: #666">
+              <div style="padding: 8px 0; border-bottom: 1px solid #eee">
+                <strong>09:25</strong> 개발팀 위험 신호 감지
+              </div>
+              <div style="padding: 8px 0; border-bottom: 1px solid #eee">
+                <strong>09:18</strong> 주간 목표 달성률 업데이트
+              </div>
+              <div style="padding: 8px 0; border-bottom: 1px solid #eee">
+                <strong>09:12</strong> 토큰샵 재고 부족 알림
+              </div>
+              <div style="padding: 8px 0">
+                <strong>08:45</strong> 신규 사용자 3명 가입
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <div class="footer-content">
+          <div>© 2025 나만의 직장선배. All rights reserved.</div>
+          <div class="footer-links">
+            <a href="#">개인정보처리방침</a>
+            <a href="#">이용약관</a>
+            <a href="#">기술문서</a>
+            <a href="#">고객지원</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      function showTab(tabName) {
+        // Hide all tab contents
+        const tabContents = document.querySelectorAll(".tab-content");
+        tabContents.forEach((tab) => {
+          tab.classList.remove("active");
+        });
+
+        // Remove active class from all nav links
+        const navLinks = document.querySelectorAll(".nav-link");
+        navLinks.forEach((link) => {
+          link.classList.remove("active");
+        });
+
+        // Show selected tab content
+        document.getElementById(tabName).classList.add("active");
+
+        // Add active class to clicked nav link
+        event.target.classList.add("active");
+      }
+    </script>
+  </body>
+</html>
